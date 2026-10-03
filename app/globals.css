@@ -54,7 +54,7 @@ button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--ice-hot); outline-offset: 3px; }
 
 /* =========================================================
-   Background — fluted steel panels, animated gradient, soft light, fog
+   Background — animated reeded glass (canvas), vignette, grain
    ========================================================= */
 .bg {
   position: fixed;
@@ -65,112 +65,12 @@ button { font: inherit; color: inherit; }
 }
 
 /* base tone: dark navy edges, cool blue-grey light in the middle */
-.bg__base {
+.bg__canvas {
   position: absolute;
   inset: 0;
-  background: radial-gradient(70% 90% at 50% 45%, #3f526b 0%, #253348 38%, #121b28 72%, #070b12 100%);
-}
-
-/* slow-moving colour gradient washing across the panels */
-.bg__gradient {
-  position: absolute;
-  inset: -50%;
-  background:
-    linear-gradient(
-      125deg,
-      #070b12 0%,
-      #1d2b40 14%,
-      #5a7394 26%,
-      #16202f 38%,
-      #0a1019 48%,
-      #3d5576 60%,
-      #8aa6c8 68%,
-      #24344b 78%,
-      #070b12 100%
-    );
-  background-size: 200% 200%;
-  opacity: 0.75;
-  mix-blend-mode: soft-light;
-  animation: gradient-flow 16s ease-in-out infinite alternate, gradient-turn 40s ease-in-out infinite alternate;
-}
-
-/* soft coloured glows that drift around */
-.bg__glow {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(80px);
-  mix-blend-mode: screen;
-  pointer-events: none;
-}
-.bg__glow--1 {
-  width: 55vmax; height: 40vmax;
-  top: -12vmax; left: -10vmax;
-  background: rgba(120, 165, 230, 0.32);
-  animation: glow-a 14s ease-in-out infinite alternate;
-}
-.bg__glow--2 {
-  width: 50vmax; height: 38vmax;
-  bottom: -14vmax; right: -12vmax;
-  background: rgba(90, 120, 200, 0.28);
-  animation: glow-b 18s ease-in-out infinite alternate;
-}
-.bg__glow--3 {
-  width: 32vmax; height: 32vmax;
-  top: 30%; left: 40%;
-  background: rgba(170, 205, 255, 0.16);
-  animation: glow-c 22s ease-in-out infinite alternate;
-}
-
-/* vertical fluted panels — each flute has a lit edge and a shadowed edge */
-.bg__flutes {
-  position: absolute;
-  inset: 0 -10%;
-  background:
-    repeating-linear-gradient(
-      90deg,
-      rgba(0, 0, 0, 0.55) 0px,
-      rgba(0, 0, 0, 0.18) 10px,
-      rgba(255, 255, 255, 0.05) 28px,
-      rgba(210, 230, 255, 0.22) 48px,
-      rgba(255, 255, 255, 0.06) 56px,
-      rgba(0, 0, 0, 0.5) 62px
-    );
-  background-size: 62px 100%;
-  mix-blend-mode: overlay;
-  opacity: 0.95;
-  animation: flute-drift 40s linear infinite;
-}
-/* fine vertical brushed texture */
-.bg__flutes::after {
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 4px);
-}
-
-/* moving light beam sweeping across the panels */
-.bg__light {
-  position: absolute;
-  top: -20%; bottom: -20%;
-  left: 50%;
-  width: 60vw;
-  margin-left: -30vw;
-  background: radial-gradient(50% 50% at 50% 50%, rgba(190, 220, 255, 0.28), transparent 70%);
-  filter: blur(30px);
-  mix-blend-mode: screen;
-  animation: light-sweep 10s ease-in-out infinite alternate;
-}
-
-/* drifting fog / tree shadows */
-.bg__fog {
-  position: absolute;
-  inset: -20%;
-  background:
-    radial-gradient(30% 25% at 20% 70%, rgba(10, 16, 24, 0.55), transparent 70%),
-    radial-gradient(25% 30% at 75% 35%, rgba(10, 16, 24, 0.45), transparent 70%),
-    radial-gradient(35% 20% at 55% 90%, rgba(170, 200, 230, 0.12), transparent 70%);
-  filter: blur(20px);
-  animation: fog 30s ease-in-out infinite alternate;
+  width: 100%;
+  height: 100%;
+  display: block;
 }
 
 /* edge vignette */
@@ -191,23 +91,6 @@ button { font: inherit; color: inherit; }
   pointer-events: none;
 }
 
-@keyframes gradient-flow {
-  0%   { background-position: 0% 0%; }
-  100% { background-position: 100% 100%; }
-}
-@keyframes gradient-turn {
-  0%   { transform: rotate(-6deg) scale(1); }
-  100% { transform: rotate(8deg) scale(1.1); }
-}
-@keyframes glow-a { to { transform: translate(40vw, 30vh) scale(1.2); } }
-@keyframes glow-b { to { transform: translate(-35vw, -35vh) scale(1.15); } }
-@keyframes glow-c { to { transform: translate(-30vw, 20vh) scale(1.4); } }
-@keyframes flute-drift { to { background-position: 62px 0; } }
-@keyframes light-sweep {
-  0%   { transform: translateX(-22vw) scaleX(0.9); opacity: 0.8; }
-  100% { transform: translateX(22vw) scaleX(1.1); opacity: 1; }
-}
-@keyframes fog { to { transform: translate(6%, -4%) scale(1.1); } }
 @keyframes grain {
   0%   { transform: translate(0, 0); }
   20%  { transform: translate(-3%, 2%); }
@@ -409,7 +292,8 @@ button { font: inherit; color: inherit; }
   margin: 26px auto 0;
   font-size: clamp(1rem, 1.6vw, 1.35rem);
   line-height: 1.55;
-  color: var(--muted);
+  color: rgba(238, 245, 255, 0.9);
+  text-shadow: 0 1px 3px rgba(4, 7, 12, 0.8), 0 0 24px rgba(4, 7, 12, 0.6);
 }
 
 .hero__actions {
@@ -484,9 +368,10 @@ button { font: inherit; color: inherit; }
 
 .section__lead {
   margin: 18px 0 0;
+  text-shadow: 0 1px 3px rgba(4, 7, 12, 0.8), 0 0 24px rgba(4, 7, 12, 0.6);
   text-align: center;
   font-size: clamp(1rem, 1.4vw, 1.2rem);
-  color: var(--muted);
+  color: rgba(238, 245, 255, 0.88);
 }
 
 /* =========================================================
@@ -774,6 +659,7 @@ button { font: inherit; color: inherit; }
    Tools – folder + cards
    ========================================================= */
 .click-hint {
+  filter: drop-shadow(0 1px 3px rgba(4, 7, 12, 0.9));
   margin: 22px 0 0;
   text-align: center;
   font-size: 13px;
@@ -1078,14 +964,6 @@ button { font: inherit; color: inherit; }
 .social--instagram { background: linear-gradient(90deg, #f9a03f 0%, #f0574f 35%, #d6249f 65%, #7b3ff2 100%); color: #fff; }
 .social--instagram .social__icon { background: rgba(255, 255, 255, 0.16); }
 
-.footer {
-  padding: 30px var(--gutter) 40px;
-  text-align: center;
-  font-size: 13px;
-  color: var(--faint);
-}
-.footer p { margin: 0; }
-
 /* =========================================================
    Tablet
    ========================================================= */
@@ -1196,11 +1074,10 @@ button { font: inherit; color: inherit; }
   .tool-card { min-height: 0; padding: 22px; }
   .tool-card h3 { padding-top: 26px; font-size: 20px; }
 
-  .section--contact { padding-top: 100px; padding-bottom: 110px; }
+  .section--contact { padding-top: 100px; padding-bottom: 130px; }
   .socials { flex-direction: column; align-items: stretch; max-width: 320px; margin-left: auto; margin-right: auto; }
   .social { min-width: 0; }
 
-  .footer { padding-bottom: 96px; }
 }
 
 /* =========================================================

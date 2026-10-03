@@ -4,8 +4,9 @@
  */
 
 export const profile = {
-  name: "Your Name",
-  email: "hello@example.com",
+  name: "Hatty",
+  siteTitle: "Hatty Portfolio",
+  email: "hattybusiness11@gmail.com",
   headline: "Ideas in Motion",
   tagline: "Bringing complex AI/Web3 products to life through motion.",
 };
@@ -99,7 +100,7 @@ export const tools: Tool[] = [
 export type SocialId = "discord" | "x" | "instagram";
 
 export const socials: { id: SocialId; label: string; href: string }[] = [
-  { id: "discord", label: "Discord", href: "https://discord.com/" },
-  { id: "x", label: "Twitter/X", href: "https://x.com/" },
-  { id: "instagram", label: "Instagram", href: "https://instagram.com/" },
+  { id: "discord", label: "Discord", href: "https://discord.com/users/432092853158805505" },
+  { id: "x", label: "Twitter/X", href: "https://x.com/hatty91625" },
+  { id: "instagram", label: "Instagram", href: "https://www.instagram.com/hatty.ssj" },
 ];

@@ -1,6 +1,6 @@
 # Portfolio
 
-A responsive single-page portfolio built with **Next.js (App Router) + TypeScript**: a steel-blue fluted-panel background, glowing neon headings, corner vines, a pill nav that follows your scroll, a live clock, expanding project cards and an animated "Tools I Use" folder.
+A responsive single-page portfolio built with **Next.js (App Router) + TypeScript**: an animated reeded-glass background, glowing neon headings, a pill nav that follows your scroll, a live clock, expanding project cards and an animated "Tools I Use" folder.
 
 ## Getting started
 
@@ -15,7 +15,7 @@ npm start        # serve the production build
 
 Everything you'll want to change lives in **`data/site.ts`**:
 
-- `profile`: name, email (used by "Get in Touch"), headline, tagline
+- `profile`: name, site title, email (used by "Get in Touch"), headline, tagline
 - `projects`: title, type, year, plus an optional `video` and `href`
 - `tools`: name, category, description, card glow colour, and where its chip lands when the folder opens
 - `socials`: Discord / X / Instagram links

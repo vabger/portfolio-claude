@@ -6,7 +6,6 @@ import Projects from "@/components/Projects";
 import Reveal from "@/components/Reveal";
 import Tools from "@/components/Tools";
 import Topbar from "@/components/Topbar";
-import { profile } from "@/data/site";
 
 export default function Home() {
   return (
@@ -20,11 +19,6 @@ export default function Home() {
         <Tools />
         <Contact />
       </main>
-      <footer className="footer">
-        <p>
-          © {new Date().getFullYear()} {profile.name}. All rights reserved.
-        </p>
-      </footer>
       <Reveal />
     </>
   );
