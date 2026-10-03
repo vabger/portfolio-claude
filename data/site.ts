@@ -29,7 +29,7 @@ export type Project = {
 
 export const projects: Project[] = [
   {
-    title: "Syping Launch Promo",
+    title: "Spklingo Launch Promo",
     type: "Product Explainer",
     year: "2025",
     poster: "sky",
@@ -45,6 +45,14 @@ export const projects: Project[] = [
     image: "/videos/phonepe.jpg",
   },
   {
+    title: "Claude — One Prompt",
+    type: "Product Promo",
+    year: "2025",
+    poster: "intro",
+    video: "/videos/claude.mp4",
+    image: "/videos/claude.jpg",
+  },
+  {
     title: "Domino's Logo Reveal",
     type: "Logo Animation",
     year: "2025",
@@ -52,9 +60,14 @@ export const projects: Project[] = [
     video: "/videos/dominos.mp4",
     image: "/videos/dominos.jpg",
   },
-  // placeholders until the remaining videos are added
-  { title: "Nova Reveal", type: "Brand Launch", year: "2025", poster: "intro" },
-  { title: "Code Review Story", type: "Motion Design", year: "2024", poster: "tags" },
+  {
+    title: "Duolingo Daily Tasks",
+    type: "App Promo",
+    year: "2025",
+    poster: "tags",
+    video: "/videos/duolingo.mp4",
+    image: "/videos/duolingo.jpg",
+  },
 ];
 
 export type ToolId = "claude" | "elevenlabs" | "figma" | "higgsfield" | "aftereffects" | "premiere";
