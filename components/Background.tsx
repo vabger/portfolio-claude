@@ -3,144 +3,170 @@
 import { useEffect, useRef } from "react";
 
 /**
- * Reeded-glass background.
- * Soft colour blobs drift around behind a sheet of vertical ribbed glass.
- * Each rib acts like a small lens: it samples the scene behind it flipped and
- * magnified, which gives the characteristic repeated, refracted stripes.
- * Rendered at low resolution into a canvas that CSS stretches to full screen.
+ * Reeded-glass background, rendered on the GPU with a WebGL fragment shader.
+ *
+ * Behind the glass: a soft glowing ring and a couple of blobs drift around,
+ * coloured with a black → indigo → violet → pink → orange → yellow ramp.
+ * The glass: narrow vertical ribs, each acting as a lens that squeezes a wide
+ * slice of the scene into the rib, so shapes break into curved slivers.
  */
 
-type Blob = {
-  color: [number, number, number];
-  radius: number; // as a fraction of the screen height
-  // orbit: centre, amplitude and speed on each axis
-  cx: number; cy: number; ax: number; ay: number; sx: number; sy: number; phase: number;
-};
+const VERTEX = `
+attribute vec2 a_pos;
+void main() { gl_Position = vec4(a_pos, 0.0, 1.0); }
+`;
 
-const BASE: [number, number, number] = [6, 10, 18];
+const FRAGMENT = `
+precision highp float;
+uniform vec2 u_res;
+uniform float u_time;
+uniform float u_rib;     // rib width in device pixels
 
-const BLOBS: Blob[] = [
-  { color: [90, 140, 220], radius: 0.26, cx: 0.28, cy: 0.38, ax: 0.22, ay: 0.16, sx: 0.11, sy: 0.08, phase: 0 },
-  { color: [50, 70, 170], radius: 0.34, cx: 0.72, cy: 0.62, ax: 0.2, ay: 0.2, sx: 0.07, sy: 0.1, phase: 2 },
-  { color: [170, 205, 250], radius: 0.13, cx: 0.5, cy: 0.42, ax: 0.38, ay: 0.16, sx: 0.13, sy: 0.17, phase: 4 },
-  { color: [95, 60, 180], radius: 0.24, cx: 0.12, cy: 0.78, ax: 0.14, ay: 0.12, sx: 0.09, sy: 0.06, phase: 1 },
-  { color: [30, 120, 170], radius: 0.22, cx: 0.88, cy: 0.18, ax: 0.12, ay: 0.18, sx: 0.08, sy: 0.12, phase: 3 },
-];
+// colour ramp
+vec3 ramp(float v) {
+  v = clamp(v, 0.0, 1.0);
+  // misty slate → steel → pale icy blue, matching the site theme
+  vec3 c0 = vec3(0.025, 0.04, 0.07);
+  vec3 c1 = vec3(0.06, 0.09, 0.15);
+  vec3 c2 = vec3(0.13, 0.19, 0.29);
+  vec3 c3 = vec3(0.25, 0.33, 0.46);
+  vec3 c4 = vec3(0.42, 0.51, 0.64);
+  vec3 c5 = vec3(0.65, 0.73, 0.84);
+  vec3 c6 = vec3(0.86, 0.91, 0.98);
+  if (v < 0.22) return mix(c0, c1, v / 0.22);
+  if (v < 0.42) return mix(c1, c2, (v - 0.22) / 0.20);
+  if (v < 0.58) return mix(c2, c3, (v - 0.42) / 0.16);
+  if (v < 0.72) return mix(c3, c4, (v - 0.58) / 0.14);
+  if (v < 0.86) return mix(c4, c5, (v - 0.72) / 0.14);
+  return mix(c5, c6, (v - 0.86) / 0.14);
+}
 
-/** Overall brightness of the glowing shapes (0–1). */
-const INTENSITY = 0.75;
+// the scene behind the glass, p in screen-height units
+float scene(vec2 p, float t) {
+  float aspect = u_res.x / u_res.y;
 
-/** Soft roll-off: keeps colours rich but stops overlaps from clipping to white. */
-const tone = (v: number) => 230 * (1 - Math.exp(-v / 170));
+  // big glowing ring that wanders and breathes
+  vec2 rc = vec2(aspect * (0.5 + 0.32 * sin(t * 0.21)), 0.5 + 0.22 * sin(t * 0.17 + 1.3));
+  float rr = 0.42 + 0.08 * sin(t * 0.33);
+  float d = length((p - rc) * vec2(0.85, 1.0));
+  float ring = exp(-pow((d - rr) / 0.075, 2.0));
+
+  // bright core blob
+  vec2 bc = vec2(aspect * (0.5 + 0.38 * sin(t * 0.13 + 2.0)), 0.5 + 0.3 * cos(t * 0.19));
+  float blob = exp(-dot(p - bc, p - bc) / 0.035);
+
+  // second, dimmer blob
+  vec2 b2 = vec2(aspect * (0.5 + 0.4 * cos(t * 0.11 + 0.7)), 0.5 + 0.35 * sin(t * 0.23 + 2.4));
+  float blob2 = exp(-dot(p - b2, p - b2) / 0.05);
+
+  return ring * 0.9 + blob * 0.85 + blob2 * 0.5;
+}
+
+void main() {
+  vec2 frag = gl_FragCoord.xy;
+  float t = u_time;
+
+  // glass slides slowly sideways
+  float x = frag.x + t * u_rib * 0.35;
+  float ribIndex = floor(x / u_rib);
+  float u = fract(x / u_rib);            // 0..1 across the rib
+
+  // lens: each rib squeezes a wide slice of the scene into its width
+  float squeeze = 6.0;
+  float centre = (ribIndex + 0.5) * u_rib - t * u_rib * 0.35;
+  float sx = centre + (u - 0.5) * u_rib * squeeze;
+
+  vec2 p = vec2(sx, frag.y) / u_res.y;
+  float v = 0.2 + scene(p, t) * 0.78;
+  vec3 col = ramp(v);
+
+  // rib shading: darker towards one side, thin dark seam, faint highlight
+  float shade = mix(0.35, 1.0, smoothstep(1.0, 0.2, u));
+  float seam = smoothstep(0.0, 0.05, u) * smoothstep(1.0, 0.94, u);
+  float highlight = exp(-pow((u - 0.18) / 0.06, 2.0)) * 0.06;
+  col = col * shade * mix(0.35, 1.0, seam) + highlight;
+
+  gl_FragColor = vec4(col, 1.0);
+}
+`;
+
+function compile(gl: WebGLRenderingContext, type: number, src: string) {
+  const s = gl.createShader(type)!;
+  gl.shaderSource(s, src);
+  gl.compileShader(s);
+  if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) {
+    console.error(gl.getShaderInfoLog(s));
+    return null;
+  }
+  return s;
+}
 
 export default function Background() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
     const canvas = canvasRef.current;
-    const ctx = canvas?.getContext("2d");
-    if (!canvas || !ctx) return;
+    if (!canvas) return;
+    const gl = canvas.getContext("webgl", { antialias: false, alpha: false, powerPreference: "low-power" });
+    if (!gl) return; // CSS fallback background stays visible
 
-    const SCALE = 4; // canvas px = css px / SCALE
-    let w = 0;
-    let h = 0;
-    let image: ImageData;
-    let rib = 16; // rib width in canvas px
+    const vs = compile(gl, gl.VERTEX_SHADER, VERTEX);
+    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAGMENT);
+    if (!vs || !fs) return;
+    const program = gl.createProgram()!;
+    gl.attachShader(program, vs);
+    gl.attachShader(program, fs);
+    gl.linkProgram(program);
+    gl.useProgram(program);
 
+    // one triangle that covers the screen
+    const buf = gl.createBuffer();
+    gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+    gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW);
+    const loc = gl.getAttribLocation(program, "a_pos");
+    gl.enableVertexAttribArray(loc);
+    gl.vertexAttribPointer(loc, 2, gl.FLOAT, false, 0, 0);
+
+    const uRes = gl.getUniformLocation(program, "u_res");
+    const uTime = gl.getUniformLocation(program, "u_time");
+    const uRib = gl.getUniformLocation(program, "u_rib");
+
+    let dpr = 1;
     const resize = () => {
-      w = Math.max(120, Math.round(window.innerWidth / SCALE));
-      h = Math.max(120, Math.round(window.innerHeight / SCALE));
+      dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      const w = Math.round(window.innerWidth * dpr);
+      const h = Math.round(window.innerHeight * dpr);
       canvas.width = w;
       canvas.height = h;
-      image = ctx.createImageData(w, h);
-      rib = window.innerWidth < 640 ? 11 : 16;
+      gl.viewport(0, 0, w, h);
+      gl.uniform2f(uRes, w, h);
+      // ~30 ribs across a desktop screen, ~16 on a phone
+      const ribCss = window.innerWidth < 640 ? 24 : Math.max(36, window.innerWidth / 32);
+      gl.uniform1f(uRib, ribCss * dpr);
     };
     resize();
     window.addEventListener("resize", resize);
 
-    // per-column refraction lookup, rebuilt when the size changes
-    const columnSource = (x: number) => {
-      const start = Math.floor(x / rib) * rib;
-      const u = (x - start) / rib; // 0..1 across the rib
-      // each rib flips and magnifies what's behind it
-      const src = start + rib / 2 - (u - 0.5) * rib * 2.6;
-      return src;
-    };
-    const ribShade = (x: number) => {
-      const u = (x % rib) / rib;
-      // bright highlight on one edge, dark seam on the other, gentle curvature
-      const curve = 0.82 + 0.18 * Math.sin(Math.PI * u);
-      const highlight = Math.exp(-((u - 0.12) ** 2) / 0.004) * 0.35;
-      const seam = Math.exp(-((u - 0.98) ** 2) / 0.002) * 0.45;
-      return { mul: curve - seam, add: highlight };
-    };
-
-    const draw = (time: number) => {
-      const t = time / 1000;
-      const data = image.data;
-
-      // blob positions for this frame, in canvas px
-      const blobs = BLOBS.map((b) => {
-        const r = b.radius * h;
-        return {
-          x: (b.cx + b.ax * Math.sin(t * b.sx * 2 + b.phase)) * w,
-          y: (b.cy + b.ay * Math.cos(t * b.sy * 2 + b.phase * 1.3)) * h,
-          inv: 1 / (2 * r * r),
-          c: b.color,
-        };
-      });
-
-      // the whole sheet of glass drifts slowly sideways
-      const drift = Math.sin(t * 0.15) * rib * 1.5 + t * rib * 0.12;
-
-      for (let x = 0; x < w; x++) {
-        const gx = x + drift;
-        const gxMod = ((gx % (rib * 1000)) + rib * 1000) % (rib * 1000);
-        const sx = columnSource(gxMod) - gxMod + x; // refracted sample x
-        const { mul, add } = ribShade(gxMod);
-
-        for (let y = 0; y < h; y++) {
-          // slight vertical wobble inside the glass
-          const sy = y + Math.sin((x / rib) * 1.7 + t * 0.8) * 1.5;
-
-          let r = BASE[0];
-          let g = BASE[1];
-          let bl = BASE[2];
-          for (const b of blobs) {
-            const dx = sx - b.x;
-            const dy = sy - b.y;
-            const k = Math.exp(-(dx * dx + dy * dy) * b.inv);
-            r += b.c[0] * k * INTENSITY;
-            g += b.c[1] * k * INTENSITY;
-            bl += b.c[2] * k * INTENSITY;
-          }
-
-          const i = (y * w + x) * 4;
-          data[i] = tone(r * mul) + add * 120;
-          data[i + 1] = tone(g * mul) + add * 140;
-          data[i + 2] = tone(bl * mul) + add * 170;
-          data[i + 3] = 255;
-        }
-      }
-      ctx.putImageData(image, 0, 0);
+    const draw = (ms: number) => {
+      gl.uniform1f(uTime, ms / 1000);
+      gl.drawArrays(gl.TRIANGLES, 0, 3);
     };
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     let raf = 0;
-    let last = 0;
-    const loop = (time: number) => {
+    const start = performance.now();
+    const loop = (now: number) => {
+      draw(now - start + 12000); // start mid-animation so the first frame isn't empty
       raf = requestAnimationFrame(loop);
-      if (time - last < 33) return; // ~30fps is plenty for a background
-      last = time;
-      draw(time);
     };
 
-    if (reduceMotion) draw(8000);
+    if (reduceMotion) draw(20000);
     else raf = requestAnimationFrame(loop);
 
     return () => {
       cancelAnimationFrame(raf);
       window.removeEventListener("resize", resize);
+      gl.getExtension("WEBGL_lose_context")?.loseContext();
     };
   }, []);
 
