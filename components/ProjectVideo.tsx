@@ -3,7 +3,7 @@
 import { useEffect, useRef } from "react";
 
 /** Plays on hover on desktop, and while in view on touch / small screens. */
-export default function ProjectVideo({ src }: { src: string }) {
+export default function ProjectVideo({ src, poster }: { src: string; poster?: string }) {
   const ref = useRef<HTMLVideoElement>(null);
 
   useEffect(() => {
@@ -36,5 +36,12 @@ export default function ProjectVideo({ src }: { src: string }) {
     };
   }, []);
 
-  return <video ref={ref} src={src} muted loop playsInline preload="metadata" />;
+  // MP4 (H.264) plays everywhere; a .webm next to it is used by browsers without H.264
+  const webm = src.replace(/\.mp4$/i, ".webm");
+  return (
+    <video ref={ref} poster={poster} muted loop playsInline preload="metadata">
+      <source src={src} type="video/mp4" />
+      {webm !== src && <source src={webm} type="video/webm" />}
+    </video>
+  );
 }

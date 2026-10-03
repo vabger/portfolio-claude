@@ -22,7 +22,7 @@ Everything you'll want to change lives in **`data/site.ts`**:
 
 ### Adding project videos
 
-Put an `.mp4` in `public/videos/` and set `video: "/videos/your-file.mp4"` on the project. Videos play on hover on desktop and while in view on phones and tablets. Projects without a video show an animated placeholder poster.
+Put an `.mp4` (H.264) in `public/videos/` and set `video: "/videos/your-file.mp4"` and `image: "/videos/your-file.jpg"` (a still frame) on the project. If a `.webm` with the same name sits next to it, it's offered as a fallback for browsers without H.264. Videos play on hover on desktop and while in view on phones and tablets. Projects without a video show an animated placeholder poster.
 
 ## Structure
 

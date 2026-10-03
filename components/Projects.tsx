@@ -11,7 +11,7 @@ export default function Projects() {
         {projects.map((p) => {
           const body = (
             <>
-              <div className="project__media">{p.video ? <ProjectVideo src={p.video} /> : <Poster kind={p.poster} />}</div>
+              <div className="project__media">{p.video ? <ProjectVideo src={p.video} poster={p.image} /> : <Poster kind={p.poster} />}</div>
               <div className="project__info">
                 <h3>{p.title}</h3>
                 <p>{p.type}</p>

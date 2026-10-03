@@ -21,15 +21,39 @@ export type Project = {
   poster: PosterKind;
   /** Optional video, e.g. "/videos/launch.mp4" (put the file in /public/videos). */
   video?: string;
+  /** Still image shown while the video loads, e.g. "/videos/launch.jpg". */
+  image?: string;
   /** Optional link opened when the card is clicked. */
   href?: string;
 };
 
 export const projects: Project[] = [
-  { title: "Tenki Product Teaser", type: "Client Work", year: "2025", poster: "sky" },
-  { title: "Omni's Launch Video", type: "Spec Work", year: "2025", poster: "omni" },
+  {
+    title: "Syping Launch Promo",
+    type: "Product Explainer",
+    year: "2025",
+    poster: "sky",
+    video: "/videos/spklingo.mp4",
+    image: "/videos/spklingo.jpg",
+  },
+  {
+    title: "PhonePe Payment Flow",
+    type: "UI Animation",
+    year: "2025",
+    poster: "phone",
+    video: "/videos/phonepe.mp4",
+    image: "/videos/phonepe.jpg",
+  },
+  {
+    title: "Domino's Logo Reveal",
+    type: "Logo Animation",
+    year: "2025",
+    poster: "omni",
+    video: "/videos/dominos.mp4",
+    image: "/videos/dominos.jpg",
+  },
+  // placeholders until the remaining videos are added
   { title: "Nova Reveal", type: "Brand Launch", year: "2025", poster: "intro" },
-  { title: "Chat Explainer", type: "App Promo", year: "2024", poster: "phone" },
   { title: "Code Review Story", type: "Motion Design", year: "2024", poster: "tags" },
 ];
 
