@@ -54,7 +54,7 @@ button { font: inherit; color: inherit; }
 :focus-visible { outline: 2px solid var(--ice-hot); outline-offset: 3px; }
 
 /* =========================================================
-   Background — fluted steel panels, soft light, fog, vines
+   Background — fluted steel panels, animated gradient, soft light, fog
    ========================================================= */
 .bg {
   position: fixed;
@@ -68,8 +68,57 @@ button { font: inherit; color: inherit; }
 .bg__base {
   position: absolute;
   inset: 0;
+  background: radial-gradient(70% 90% at 50% 45%, #3f526b 0%, #253348 38%, #121b28 72%, #070b12 100%);
+}
+
+/* slow-moving colour gradient washing across the panels */
+.bg__gradient {
+  position: absolute;
+  inset: -50%;
   background:
-    radial-gradient(70% 90% at 50% 45%, #4a5c74 0%, #2b3a4f 35%, #141d2a 70%, #070b12 100%);
+    linear-gradient(
+      125deg,
+      #070b12 0%,
+      #1d2b40 14%,
+      #5a7394 26%,
+      #16202f 38%,
+      #0a1019 48%,
+      #3d5576 60%,
+      #8aa6c8 68%,
+      #24344b 78%,
+      #070b12 100%
+    );
+  background-size: 200% 200%;
+  opacity: 0.75;
+  mix-blend-mode: soft-light;
+  animation: gradient-flow 16s ease-in-out infinite alternate, gradient-turn 40s ease-in-out infinite alternate;
+}
+
+/* soft coloured glows that drift around */
+.bg__glow {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+.bg__glow--1 {
+  width: 55vmax; height: 40vmax;
+  top: -12vmax; left: -10vmax;
+  background: rgba(120, 165, 230, 0.32);
+  animation: glow-a 14s ease-in-out infinite alternate;
+}
+.bg__glow--2 {
+  width: 50vmax; height: 38vmax;
+  bottom: -14vmax; right: -12vmax;
+  background: rgba(90, 120, 200, 0.28);
+  animation: glow-b 18s ease-in-out infinite alternate;
+}
+.bg__glow--3 {
+  width: 32vmax; height: 32vmax;
+  top: 30%; left: 40%;
+  background: rgba(170, 205, 255, 0.16);
+  animation: glow-c 22s ease-in-out infinite alternate;
 }
 
 /* vertical fluted panels — each flute has a lit edge and a shadowed edge */
@@ -109,7 +158,7 @@ button { font: inherit; color: inherit; }
   background: radial-gradient(50% 50% at 50% 50%, rgba(190, 220, 255, 0.28), transparent 70%);
   filter: blur(30px);
   mix-blend-mode: screen;
-  animation: light-sweep 18s ease-in-out infinite alternate;
+  animation: light-sweep 10s ease-in-out infinite alternate;
 }
 
 /* drifting fog / tree shadows */
@@ -142,29 +191,23 @@ button { font: inherit; color: inherit; }
   pointer-events: none;
 }
 
-/* corner vines (SVG generated in script.js) */
-.vine {
-  position: absolute;
-  pointer-events: none;
-  filter: drop-shadow(0 0 6px rgba(0, 0, 0, 0.5));
-  opacity: 0.92;
+@keyframes gradient-flow {
+  0%   { background-position: 0% 0%; }
+  100% { background-position: 100% 100%; }
 }
-.vine--tl { top: -10px; left: -10px; width: min(46vw, 560px); transform-origin: 0 0; animation: sway-tl 9s ease-in-out infinite alternate; }
-.vine--br { right: -10px; bottom: -10px; width: min(40vw, 480px); transform-origin: 100% 100%; animation: sway-br 11s ease-in-out infinite alternate; }
-.vine .leaf { fill: #1c3532; }
-.vine .leaf--lit { fill: #2f504b; }
-.vine .stem { stroke: #1a2b2a; fill: none; stroke-linecap: round; }
-.vine .flower { fill: #eef6ff; filter: url(#bloom); animation: twinkle 4s ease-in-out infinite; }
-
+@keyframes gradient-turn {
+  0%   { transform: rotate(-6deg) scale(1); }
+  100% { transform: rotate(8deg) scale(1.1); }
+}
+@keyframes glow-a { to { transform: translate(40vw, 30vh) scale(1.2); } }
+@keyframes glow-b { to { transform: translate(-35vw, -35vh) scale(1.15); } }
+@keyframes glow-c { to { transform: translate(-30vw, 20vh) scale(1.4); } }
 @keyframes flute-drift { to { background-position: 62px 0; } }
 @keyframes light-sweep {
   0%   { transform: translateX(-22vw) scaleX(0.9); opacity: 0.8; }
   100% { transform: translateX(22vw) scaleX(1.1); opacity: 1; }
 }
 @keyframes fog { to { transform: translate(6%, -4%) scale(1.1); } }
-@keyframes sway-tl { to { transform: rotate(1.6deg); } }
-@keyframes sway-br { to { transform: rotate(-1.8deg); } }
-@keyframes twinkle { 50% { opacity: 0.55; } }
 @keyframes grain {
   0%   { transform: translate(0, 0); }
   20%  { transform: translate(-3%, 2%); }
@@ -1032,8 +1075,8 @@ button { font: inherit; color: inherit; }
 .social--discord .social__icon { background: rgba(255, 255, 255, 0.16); }
 .social--x { background: linear-gradient(90deg, #fff, #f1f1f1); color: #111; }
 .social--x .social__icon { background: #111; color: #fff; }
-.social--ig { background: linear-gradient(90deg, #f9a03f 0%, #f0574f 35%, #d6249f 65%, #7b3ff2 100%); color: #fff; }
-.social--ig .social__icon { background: rgba(255, 255, 255, 0.16); }
+.social--instagram { background: linear-gradient(90deg, #f9a03f 0%, #f0574f 35%, #d6249f 65%, #7b3ff2 100%); color: #fff; }
+.social--instagram .social__icon { background: rgba(255, 255, 255, 0.16); }
 
 .footer {
   padding: 30px var(--gutter) 40px;
@@ -1115,8 +1158,37 @@ button { font: inherit; color: inherit; }
   .scroll-hint { display: none; }
 
   .section { padding-top: 90px; padding-bottom: 60px; }
-  .projects { margin-top: 34px; gap: 14px; }
-  .project { flex-basis: 80%; height: min(520px, 70vh); border-radius: 28px; }
+  /* projects stack into a single column */
+  .projects {
+    flex-direction: column;
+    overflow: visible;
+    scroll-snap-type: none;
+    margin: 34px auto 0;
+    padding: 0;
+    gap: 18px;
+  }
+  .project {
+    flex: none;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 5 / 4;
+    border-radius: 30px;
+  }
+  /* info appears when a card is tapped */
+  .project__info { opacity: 0; transform: translateY(16px); }
+  .project:focus-within .project__info,
+  .project:active .project__info { opacity: 1; transform: none; }
+  /* scale the animated posters down to fit the smaller cards */
+  .poster--sky .poster__orb { width: 190px; height: 190px; }
+  .poster--sky .poster__orb svg { width: 64px; height: 64px; }
+  .poster__marquee { font-size: 44px; }
+  .poster__stack { font-size: 64px; margin-top: 0; }
+  .poster__ring { width: 120px; height: 120px; margin-top: -60px; left: -60px; border-width: 16px; }
+  .poster__shine { font-size: 48px; }
+  .poster__bigword { font-size: 80px; top: 4%; }
+  .phone { transform: rotate(-24deg) scale(0.62); margin-top: 60px; animation: none; }
+  .tag { font-size: 18px; padding: 14px 20px; }
+  .tag--big { font-size: 28px; }
 
   .tools { margin-top: 30px; gap: 28px; }
   .tools.is-open .tools__folder-col { padding-top: 9.5em; font-size: min(16px, 3.5vw); }

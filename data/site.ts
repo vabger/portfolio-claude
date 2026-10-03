@@ -7,8 +7,7 @@ export const profile = {
   name: "Your Name",
   email: "hello@example.com",
   headline: "Ideas in Motion",
-  tagline:
-    "I turn complex AI/Web3 products into videos that make investors lean in and users actually get it.",
+  tagline: "Bringing complex AI/Web3 products to life through motion.",
 };
 
 export type PosterKind = "sky" | "omni" | "intro" | "phone" | "tags";
